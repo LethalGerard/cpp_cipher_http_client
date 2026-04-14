@@ -1,8 +1,6 @@
 # Cipher Server CTF
 
-You are given a template for making HTTP requests and parsing responses. Your missing is to implement a client connection using TCP sockets, retrieve the encrypted messages and decrypt them - one endpoint at the time!
-You are given a running HTTP server that serves encrypted text over plain TCP sockets.
-Your mission is to retrieve the encrypted messages and decrypt them — one endpoint at a time.
+You are given a template for making HTTP requests and parsing responses. Your mission is to implement a client connection using TCP sockets, retrieve the encrypted messages and decrypt them - one endpoint at the time!
 
 ---
 
