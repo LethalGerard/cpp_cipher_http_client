@@ -1,0 +1,3 @@
+C:/Users/prett/Desktop/projects/mentorskap/hackathons/cpp_cipher_client/build/CMakeFiles/cipher_client.dir
+C:/Users/prett/Desktop/projects/mentorskap/hackathons/cpp_cipher_client/build/CMakeFiles/edit_cache.dir
+C:/Users/prett/Desktop/projects/mentorskap/hackathons/cpp_cipher_client/build/CMakeFiles/rebuild_cache.dir
