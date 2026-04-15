@@ -91,6 +91,9 @@ std::optional<std::string> sendRequest(const std::string& host,
      * STEP 6 - Close the socket
      * Always clean up the - remember to close the socket!
      */
+
+    std::cout << "Request sent to: " << host << ":" << port << path << std::endl;
+    return std::nullopt;
 }
 
 int main() {
