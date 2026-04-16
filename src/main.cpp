@@ -49,23 +49,52 @@ std::optional<std::string> sendRequest(const std::string& host,
      * ----------------------------------------------------------
      */
 
+     SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+     if (sock == INVALID_SOCKET)
+     {
+        std::cout << "Failed to create socket: " << WSAGetLastError() << std::endl;
+        WSACleanup();
+        return std::nullopt;
+     }
+
+    /**
+     * ----------------------------------------------------------)
+
     /**
      * ----------------------------------------------------------
      * STEP 2 - Fill in the server address struct
      * The sockaddr_in struct describes and IPv4 endpoint, with
-     * some cryptic functions:
-     * - inet_pton()    converts IP-string to 4 bytes.
-     * - htons()        converts the port to network byte order
-     * ----------------------------------------------------------
      */
-    
-    /**
-     * ----------------------------------------------------------
-     * STEP 3 - Connect to the server
+
+     sockaddr_in server;
+     server.sin_family = AF_INET;
+     server.sin_port = htons(8080);
+     InetPtonA(AF_INET, "172.20.203.149", &server.sin_addr.S_un.S_addr);
+
+     if (connect(sock, (SOCKADDR*)&server, sizeof(server)) == SOCKET_ERROR)
+     {
+        std::cout << "Failed to connect: " << WSAGetLastError << std::endl;
+        closesocket(sock);
+        WSACleanup();
+        return std::nullopt;
+     }
+
+     /*
+       * STEP 3 - Connect to the server
      * connect() performs the TCP three-way handshake, when this
      * succeeds - the socket is ready for I/O.
      * ----------------------------------------------------------
      */
+
+     const std::string request = "GET /test HTTP/1.1\r\nHost: 172.20.203.149\r\nConnection: close\r\n\r\n";
+     
+     if (send(sock, request.c_str(), (int)request.length(), 0) == SOCKET_ERROR)
+     {
+        std::cout << "Failed to send request: " << WSAGetLastError() << std::endl;
+        closesocket(sock);
+        WSACleanup();
+        return std::nullopt;
+     }
 
     /**
      * ----------------------------------------------------------
@@ -75,7 +104,6 @@ std::optional<std::string> sendRequest(const std::string& host,
      * stream.
      * ----------------------------------------------------------
      */
-
     /** 
      * ----------------------------------------------------------
      * STEP 5 - Read the response
@@ -86,14 +114,30 @@ std::optional<std::string> sendRequest(const std::string& host,
      * - else = something went wrong.
      */
 
+     char buffer[2048];
+     std::string response;
+     while (true)
+     {
+        memset(buffer, 0, sizeof(buffer));
+        int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
+        if (bytesReceived > 0) {
+            response.append(buffer, bytesReceived);
+        } else if (bytesReceived == 0) {
+            break;
+        } else {
+            std::cout << "Failed to receive response: " << WSAGetLastError() << std::endl;
+            break;
+        }
+     }
+
     /**
      * ----------------------------------------------------------
      * STEP 6 - Close the socket
      * Always clean up the - remember to close the socket!
      */
 
-    std::cout << "Request sent to: " << host << ":" << port << path << std::endl;
-    return std::nullopt;
+     std::cout << "Request sent to: " << host << ":" << port << path << std::endl;
+     return response;
 }
 
 int main() {
