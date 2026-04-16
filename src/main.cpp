@@ -21,6 +21,7 @@
 #include <string>
 #include <optional>
 #include <vector>
+#include <cstring>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -60,7 +61,7 @@ std::optional<std::string> sendRequest(const std::string& host,
     /**
      * ----------------------------------------------------------)
 
-    /**
+    
      * ----------------------------------------------------------
      * STEP 2 - Fill in the server address struct
      * The sockaddr_in struct describes and IPv4 endpoint, with
@@ -73,7 +74,7 @@ std::optional<std::string> sendRequest(const std::string& host,
 
      if (connect(sock, (SOCKADDR*)&server, sizeof(server)) == SOCKET_ERROR)
      {
-        std::cout << "Failed to connect: " << WSAGetLastError << std::endl;
+        std::cout << "Failed to connect: " << WSAGetLastError() << std::endl;
         closesocket(sock);
         WSACleanup();
         return std::nullopt;
@@ -115,13 +116,13 @@ std::optional<std::string> sendRequest(const std::string& host,
      */
 
      char buffer[2048];
-     std::string response;
+     std::string raw_response;
      while (true)
      {
         memset(buffer, 0, sizeof(buffer));
         int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
         if (bytesReceived > 0) {
-            response.append(buffer, bytesReceived);
+            raw_response.append(buffer, bytesReceived);
         } else if (bytesReceived == 0) {
             break;
         } else {
@@ -136,12 +137,15 @@ std::optional<std::string> sendRequest(const std::string& host,
      * Always clean up the - remember to close the socket!
      */
 
+    
+     Response response = parseResponse(raw_response);
+
      std::cout << "Request sent to: " << host << ":" << port << path << std::endl;
-     return response;
+     return response.body;
 }
 
 int main() {
-    const std::string HOST = "192.168.0.106";
+    const std::string HOST = "172.20.203.149";
     const int         PORT = 8080;
 
     // Initialise Winsock (Windows only — must be done before any socket call).
@@ -163,6 +167,12 @@ int main() {
      * ----------------------------------------------------------
      */
 
+     std::string p = "/test";
+     auto res = sendRequest(HOST, PORT, p);
+     if (res.has_value()) {
+        std::cout << res.value() << std::endl;
+     }
+
     /**
      * ----------------------------------------------------------
      * STEP 2 - Decrypt the ciphertext!
@@ -180,6 +190,7 @@ int main() {
      *      4. Decrypt the ciphertext and save the result in a file with the endpoint name
      */
 
+     /*
     const std::vector<std::string> endpoints = {
         "/inverse-cipher",
         "/rot13-cipher",
@@ -195,14 +206,17 @@ int main() {
         "/monome-cipher",
         "/playfair-cipher",
     };
-
+    */
+    
+   /**
     for (const auto& path : endpoints) {
-        /**
          * CODE
-         */
+         
+         sendRequest(HOST, PORT, path);
+        }
+   */
+    
 
-        sendRequest(HOST, PORT, path);
-    }
     #ifdef _WIN32
     WSACleanup();
     #endif
